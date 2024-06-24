@@ -15,8 +15,8 @@ const createTables = async () => {
     DROP TABLE IF EXISTS departments;
     DROP TABLE IF EXISTS roles;
     DROP TABLE IF EXISTS investigators;
-    DROP TABLE IF EXISTS rasUnits;
     DROP TABLE IF EXISTS schools;
+    DROP TABLE IF EXISTS rasUnits;
 
     CREATE TABLE roles(     
         id UUID PRIMARY KEY,
@@ -122,6 +122,12 @@ const createUser = async ({ email, password, jobTitle, empID, jobRole, rasName }
     return response.rows[0];
 };
 
+const createUserAndGenerateToken = async ({ email, password }) => {
+    const user = await createUser({ email, password });
+    const token = await jwt.sign({ id: user.id }, JWT);
+    return { token };
+}
+
 const createRole = async ({ roleName, management }) => {
     const SQL = `
     INSERT INTO roles(roleName, management)
@@ -183,6 +189,43 @@ const destroyAssignment = async ({ user_id, id }) => {
     await client.query(SQL, [user_id, id]);
 };
 
+const authenticate = async ({ email, password }) => {
+    const SQL = `
+    SELECT id, email, password FROM users WHERE email=$1;
+    `;
+    const response = await client.query(SQL, [email]);
+    if (!response.rows.length || (await bcrypt.compare(password, response.rows[0].password)) === false) {
+        const error = Error('bad credentials');
+        error.status = 401;
+        throw error;
+    }
+    const token = await jwt.sign({ id: response.rows[0].id }, JWT);
+    return { token };
+};
+
+const findUserWithToken = async (token) => {
+    let id;
+    try {
+        const payload = await jwt.verify(token, JWT);
+        id = payload.id;
+    } catch (ex) {
+        const error = Error('not authorized');
+        error.status = 401;
+        throw error;
+    }
+    const SQL = `
+    SELECT id, email FROM users WHERE id=$1;
+    `;
+    const response = await client.query(SQL, [id]);
+    if (!response.rows.length) {
+        const error = Error('not authorized');
+        error.status = 401;
+        throw error;
+    }
+    return response.rows[0];
+};
+
+
 module.exports = {
     client,
     authenticate,
@@ -196,5 +239,8 @@ module.exports = {
     fetchDepartments,
     fetchAssignments,
     createAssignment,
-    destroyAssignment
+    destroyAssignment,
+    authenticate,
+    findUserWithToken,
+    createUserAndGenerateToken
 };

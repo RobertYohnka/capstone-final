@@ -12,7 +12,8 @@ const {
     fetchAssignments,
     createAssignment,
     destroyAssignment,
-    findUserWithToken
+    findUserWithToken,
+    createUserAndGenerateToken
 } = require('./db');
 const express = require('express');
 const app = express();

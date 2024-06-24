@@ -18,55 +18,197 @@ function App() {
   const dept_id = null;
 
   useEffect(() => {
-    console.log('--->>> useEffect start');
-    const fetchDepartments = async () => {
-      console.log('- - - > > > fetchDepartments start');
-      try {
-        const response = await fetch(`${APIURL}/api/departments`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch departments");
-        } else {
-          const data = await response.json();
-          console.log("--------- Departments fetched:", data);
-          setDepartments(data);
-        }
-      } catch (error) {
-        console.error("Error fetching departments:", error);
+    attemptLoginWithToken();
+  }, []);
+
+  const attemptLoginWithToken = async () => {
+    const token = window.localStorage.getItem('token');
+    if (token) {
+      const response = await fetch('/api/auth/me`, {
+        headers: {
+        Authorization: `Bearer ${token}`
       }
+      });
+    const json = await response.json();
+    if (json) {
+      setToken(token);
+      if (response.ok) {
+        setAuth(json);
+      }
+      else {
+        window.localStorage.removeItem('token');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const response = await fetch('/api/departments');
+      const json = await response.json();
+      setDepartments(json);
     };
 
     fetchDepartments();
-    console.log('--->>> useEffect end');
   }, []);
 
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      const response = await fetch(`/api/departments/${auth.id}/assignments`, {
+        headers: {
+          Authorization: window.localStorage.getItem('token')
+        }
+      });
+      const json = await response.json();
+      if (response.ok) {
+        setAssignments(json);
+      }
+    };
+    if (auth.id) {
+      fetchAssignments();
+    }
+    else {
+      setAssignments([]);
+    }
+  }, [auth]);
 
-  return (
+  const login = async (Credentials) => {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(Credentials),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const json = await response.json();
+    if (response.ok) {
+      window.localStorage.setItem('token', json.token);
+      attemptLoginWithToken();
+    }
+    else {
+      throw json;
+    }
+  };
+
+  const register = async (credentials) => {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const json = await response.json();
+    if (response.ok) {
+      window.localStorage.setItem('token', json.token);
+      attemptLoginWithToken();
+    }
+    else {
+      throw json;
+    }
+  };
+
+
+  //this is reserved for manager role
+  const addAssignment = async (dept_id) => {
+    const response = await fetch(`/api/users/${auth.id}/assignments`, {
+      method: 'POST',
+      body: JSON.stringify({ dept_id }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: window.localStorage.getItem('token')
+      }
+    });
+
+    const json = await response.json();
+    if (response.ok) {
+      setAssignments([...assignments, json]);
+    }
+    else {
+      console.log(json);
+    }
+  }
+
+  const removeAssignment = async (id) => {
+    const response = await fetch(`/api/users/${auth.id}/assignments/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: window.localStorage.getItem('token')
+      }
+    });
+
+    if (response.ok) {
+      setAssignments(assignments.filter(assignment => assignment.id !== id));
+    }
+  }
+    else {
+    console.log(json);
+  }
+
+  const logout = () => {
+    window.localStorage.removeItem('token');
+    setAuth(null);
+  };
+
+  return {
     <>
-      <nav>
-        <Link to='/Authlogin'>Login</Link>
-        <Link to='/AuthRegister'>Account</Link>
-      </nav>
-      <h1>University Research Administration Services</h1>
-      <div id="navbar">
-        <Navigations />
-      </div>
-      <div id="main-section">
-        <h4>"RAS is here to help you with your research needs.  Find your RAS by Dept."</h4>
-        <Routes>
-          <Route path='/Authlogin' element={<AuthLogin setToken={setToken} />} />
-          <Route path='/AcctRasAdmin' element={<AcctRasAdmin token={token} />} />
-          <Route path='/AuthRegister' element={<AuthRegister setToken={setToken} />} />
-          <Route path='/departments' element={<Departments departments={departments} token={token} />} />
-          <Route path='/departments/:id' element={<SingleDepartment departments={departments} />} />
-          <Route path='/' element={<Home />} />
-        </Routes>
-      </div>
-    </>
-  );
+    {
+        !auth.id ? <>
+    <Login login={login} />
+    <Register register={register} />
+  </>
+    : <button onCLick={logout}>Logout {auth.email}</button>
+}
+    }
+<ul>
+  {
+    departments.map(department => {
+      const isAssigned = assignments.find(assignment => assignment.deparment_id === department.id);
+      return (
+        <li key={department.id} className={isAssigned ? 'assigned' : ''}>
+          {department.name}
+          {
+            auth.id && isAssigned && <button onClick={() => removeAssignment(isAssigned.id)}>Remove</button>
+          }
+          {
+            auth.id && !isAssigned && <button onClick={() => addAssignment(department.id)}>Assign</button>
+          }
+        </li>
+      );
+    })
+  }
+</ul>
+
+
+
+
+
+
+
+return (
+  <>
+    <nav>
+      <Link to='/Authlogin'>Login</Link>
+      <Link to='/AuthRegister'>Account</Link>
+    </nav>
+    <h1>University Research Administration Services</h1>
+    <div id="navbar">
+      <Navigations />
+    </div>
+    <div id="main-section">
+      <h4>"RAS is here to help you with your research needs.  Find your RAS by Dept."</h4>
+      <Routes>
+        <Route path='/Authlogin' element={<AuthLogin setToken={setToken} />} />
+        <Route path='/AcctRasAdmin' element={<AcctRasAdmin token={token} />} />
+        <Route path='/AuthRegister' element={<AuthRegister setToken={setToken} />} />
+        <Route path='/departments' element={<Departments departments={departments} token={token} />} />
+        <Route path='/departments/:id' element={<SingleDepartment departments={departments} />} />
+        <Route path='/' element={<Home />} />
+      </Routes>
+    </div>
+  </>
+);
 }
 
 export default App
