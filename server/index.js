@@ -9,6 +9,7 @@ const {
     createInvestigator,
     fetchUsers,
     fetchDepartments,
+    fetchInvestigators,
     fetchAssignments,
     createAssignment,
     destroyAssignment,
@@ -74,6 +75,15 @@ app.get('/api/users', async (req, res, next) => {
 app.get('/api/departments', async (req, res, next) => {
     try {
         res.send(await fetchDepartments());
+    }
+    catch (ex) {
+        next(ex);
+    }
+});
+
+app.get('/api/investigators', async (req, res, next) => {
+    try {
+        res.send(await fetchInvestigators());
     }
     catch (ex) {
         next(ex);

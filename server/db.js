@@ -36,6 +36,7 @@ const createTables = async () => {
         id UUID PRIMARY KEY,
         email VARCHAR(20) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        userName VARCHAR(20),
         jobTitle VARCHAR(20),
         empID VARCHAR(10),
         jobRole VARCHAR(20) REFERENCES roles(roleName),
@@ -46,8 +47,10 @@ const createTables = async () => {
         id UUID PRIMARY KEY,
         email VARCHAR(20) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        invName VARCHAR(20),
         invTitle VARCHAR(20),
         empID VARCHAR(10),
+        commonsId VARCHAR(10),
         );
 
     CREATE TABLE schools(
@@ -78,20 +81,6 @@ const createTables = async () => {
 
 };
 
-const authenticate = async ({ username, password }) => {
-    const SQL = `
-        SELECT id, username, password FROM users WHERE username=$1;
-    `;
-    const response = await client.query(SQL, [username]);
-    if (response.rows.length || (await bcrypt.compare(password, response.rows[0].password)) === false) {
-        const error = Error('bad credentials');
-        error.status = 401;
-        throw error;
-    }
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT);
-    return { token };
-};
-
 const createSchool = async ({ schoolName, schoolID, schoolDean }) => {
     const SQL = `
     INSERT INTO schools(schoolName, schoolID, schoolDean)
@@ -112,13 +101,13 @@ const createDepartment = async ({ deptName, deptID, deptChair, deptAdmin, school
     return response.rows[0];
 };
 
-const createUser = async ({ email, password, jobTitle, empID, jobRole, rasName }) => {
+const createUser = async ({ email, password, name, jobTitle, empID, jobRole, rasName }) => {
     const SQL = `
-    INSERT INTO users(email, password, jobTitle, empID, jobRole, rasName)
-    VALUES($1, $2, $3, $4, $5, $6)
+    INSERT INTO users(email, password, name, jobTitle, empID, jobRole, rasName)
+    VALUES($1, $2, $3, $4, $5, $6, $7)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), email, password, jobTitle, empID, jobRole, rasName]);
+    const response = await client.query(SQL, [uuid.v4(), email, password, name, jobTitle, empID, jobRole, rasName]);
     return response.rows[0];
 };
 
@@ -138,13 +127,13 @@ const createRole = async ({ roleName, management }) => {
     return response.rows[0];
 };
 
-const createInvestigator = async ({ email, password, invTitle, empID }) => {
+const createInvestigator = async ({ email, password, name, invTitle, empID, commonsId }) => {
     const SQL = `
-    INSERT INTO investigators(email, password, invTitle, empID)
-    VALUES($1, $2, $3, $4)
+    INSERT INTO investigators(email, password, name, invTitle, empID, commonsId)
+    VALUES($1, $2, $3, $4, $5, $6)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), email, password, invTitle, empID]);
+    const response = await client.query(SQL, [uuid.v4(), email, password, name, invTitle, empID, commonsId]);
     return response.rows[0];
 };
 
@@ -159,6 +148,14 @@ const fetchUsers = async () => {
 const fetchDepartments = async () => {
     const SQL = `
     SELECT * FROM departments;
+    `;
+    const response = await client.query(SQL);
+    return response.rows;
+};
+
+const fetchInvestigators = async () => {
+    const SQL = `
+    SELECT * FROM investigators;
     `;
     const response = await client.query(SQL);
     return response.rows;
@@ -199,7 +196,7 @@ const authenticate = async ({ email, password }) => {
         error.status = 401;
         throw error;
     }
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT);
+    const token = jwt.sign({ id: response.rows[0].id }, JWT);
     return { token };
 };
 
@@ -237,6 +234,7 @@ module.exports = {
     createInvestigator,
     fetchUsers,
     fetchDepartments,
+    fetchInvestigators,
     fetchAssignments,
     createAssignment,
     destroyAssignment,
