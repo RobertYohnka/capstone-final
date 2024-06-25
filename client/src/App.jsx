@@ -151,64 +151,29 @@ function App() {
     setAuth(null);
   };
 
-  return {
+  return (
     <>
-    {
-        !auth.id ? <>
-    <Login login={login} />
-    <Register register={register} />
-  </>
-    : <button onCLick={logout}>Logout {auth.email}</button>
-}
-    }
-<ul>
-  {
-    departments.map(department => {
-      const isAssigned = assignments.find(assignment => assignment.deparment_id === department.id);
-      return (
-        <li key={department.id} className={isAssigned ? 'assigned' : ''}>
-          {department.name}
-          {
-            auth.id && isAssigned && <button onClick={() => removeAssignment(isAssigned.id)}>Remove</button>
-          }
-          {
-            auth.id && !isAssigned && <button onClick={() => addAssignment(department.id)}>Assign</button>
-          }
-        </li>
-      );
-    })
-  }
-</ul>
-
-
-
-
-
-
-
-return (
-  <>
-    <nav>
-      <Link to='/Authlogin'>Login</Link>
-      <Link to='/AuthRegister'>Account</Link>
-    </nav>
-    <h1>University Research Administration Services</h1>
-    <div id="navbar">
-      <Navigations />
-    </div>
-    <div id="main-section">
-      <h4>"RAS is here to help you with your research needs.  Find your RAS by Dept."</h4>
-      <Routes>
-        <Route path='/Authlogin' element={<AuthLogin setToken={setToken} />} />
-        <Route path='/AcctRasAdmin' element={<AcctRasAdmin token={token} />} />
-        <Route path='/AuthRegister' element={<AuthRegister setToken={setToken} />} />
-        <Route path='/departments' element={<Departments departments={departments} token={token} />} />
-        <Route path='/departments/:id' element={<SingleDepartment departments={departments} />} />
-        <Route path='/' element={<Home />} />
-      </Routes>
-    </div>
-  </>
-);
+      <nav>
+        <Link to='/Authlogin'>Login</Link>
+        <Link to='/AuthRegister'>Account</Link>
+      </nav>
+      <h1>University Research Administration Services</h1>
+      <div id="navbar">
+        <Navigations />
+      </div>
+      <div id="main-section">
+        <h4>"RAS is here to help you with your research needs.  Find your RAS by Dept."</h4>
+        <Routes>
+          <Route path='/pages/LoginPage' element={<LoginPage setToken={setToken} />} />
+          <Route path='/AcctRasAdmin' element={<AcctRasAdmin token={token} />} />
+          <Route path='/AuthRegister' element={<AuthRegister setToken={setToken} />} />
+          <Route path='/departments' element={<Departments departments={departments} token={token} />} />
+          <Route path='/departments/:id' element={<SingleDepartment departments={departments} />} />
+          <Route path='/' element={<Home />} />
+        </Routes>
+      </div>
+    </>
+  );
 }
 
 export default App

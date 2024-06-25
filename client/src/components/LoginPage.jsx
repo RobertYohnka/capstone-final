@@ -1,4 +1,5 @@
-import React, (useContext, useState) from 'react';
+import { idleTimeoutMillis } from 'pg/lib/defaults';
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = ({ login }) => {
@@ -11,31 +12,43 @@ const LoginPage = ({ login }) => {
         event.preventDefault();
         try {
             await login({ email, password });
-            navigate('/');
+            navigate('/'); // Assuming you want to navigate to the home page after a successful login
         } catch (error) {
             setError('Invalid username or password');
         }
-    };
+    }
 
     return (
-        <form onSubmit= { submit } >
-        { error && <div>{ error } < /div> }
-        < input
-    value = { email }
-    placeholder = 'email'
-    onChange = { ev=> setEmail(ev.target.value)}
-/>
-    < input
-value = { password }
-placeholder = 'password'
-type = 'password'
-onChange = { ev => setPassword(ev.target.value) }
-    />
-    <button disabled={ !email || !password }> Login < /button>
-        < /form>
-      );
-    };
+
+        // <div className="auth-container">
+        <h1>'Login</h1>
+        // <form onSubmit={handleSubmit}>   
+        //     {error && <div>{error}</div>}         
+        //     <label>Email</label>
+        //     <input 
+        //         type='email'
+        //         name='email'
+        //         id='email'
+        //         value={credentials.email} 
+        //         placeholder='Email' 
+        //         onChange={handleChange}
+        //         required
+        //     />
+        //     <label>Password</label
+        //     <input 
+        //         type='password'
+        //         name='password'
+        //         id='password'
+        //         value={credentials.password} 
+        //         placeholder='Password' 
+        //         onChange={handleChange}
+        //         required
+        //     />
+        //     <button disabled={!email || !password}>Login</button>
+        // </form>
+        // </div>
+        </div >
+    );
+};
 
 export default LoginPage;
-
-
