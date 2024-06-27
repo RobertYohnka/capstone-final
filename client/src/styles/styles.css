@@ -1,5 +1,5 @@
 body {
-    font-family: Arial. sans-serif;
+    font-family: Arial sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -14,8 +14,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width;
-    1200px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -54,6 +53,29 @@ nav a {
 
 .card,
 .news-item {
+    background-color: #f8f8f8;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.users,
+.departments {
+    padding: 20px;
+    text-align: center;
+}
+
+.user-list,
+.department-list {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.user-card,
+.department-card {
     background-color: #f8f8f8;
     padding: 20px;
     border-radius: 10px;

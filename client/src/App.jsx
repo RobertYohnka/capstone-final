@@ -2,7 +2,9 @@ import React from 'react';
 import Header from './components/Header';
 import Services from './components/Services';
 import News from './components/News';
+import Departments from './components/Departments';
 import Footer from './components/Footer';
+import Users from './components/Users';
 import './styles/styles.css';
 
 const App = () => {
@@ -11,6 +13,8 @@ const App = () => {
       <Header />
       <Services />
       <News />
+      <Users />
+      <Departments />
       <Footer />
     </div>
   );
