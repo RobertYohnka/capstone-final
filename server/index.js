@@ -153,51 +153,51 @@ const init = async () => {
     console.log('tables created');
 
     const [bob, bill, sarah, amanda, claire, fran, jill] = await Promise.all([
-        createUser({ email: 'bob@email.com', password: '123' }),
-        createUser({ email: 'bill@email.com', password: '123' }),
-        createUser({ emaiol: 'sarah@email.com', password: '123' }),
-        createUser({ emaiol: 'amanda@email.com', password: '123' }),
-        createUser({ emaiol: 'claire@email.com', password: '123' }),
-        createUser({ emaiol: 'fran@email.com', password: '123' }),
-        createUser({ emaiol: 'jill@email.com', password: '123' })
+        createUser({ userName: 'bob', email: 'bob@email.com', password: '123' }),
+        createUser({ userName: 'bill', email: 'bill@email.com', password: '123' }),
+        createUser({ userName: 'sarah', email: 'sarah@email.com', password: '123' }),
+        createUser({ userName: 'amanda', email: 'amanda@email.com', password: '123' }),
+        createUser({ userName: 'claire', email: 'claire@email.com', password: '123' }),
+        createUser({ userName: 'fran', email: 'fran@email.com', password: '123' }),
+        createUser({ userName: 'jill', email: 'jill@email.com', password: '123' })
+    ]);
+    const [medicine, publicHealth, nursing, artsAndSciences, primateCenter] = await Promise.all([
+        createSchool({ schoolName: 'medicine', schoolID: '20000' }),
+        createSchool({ schoolName: 'publicHealth', schoolID: '20001' }),
+        createSchool({ schoolName: 'nursing', schoolID: '20002' }),
+        createSchool({ schoolName: 'artsAndSciences', schoolID: '20003' }),
+        createSchool({ schoolName: 'primateCenter', schoolID: '20004' })
     ]);
 
     const [pathology, dermatology, obgyn, ophthalmology, neurology, neurosurgery, orthopedics] = await Promise.all([
-        createDepartment({ deptName: 'pathology', deptID: '736000' }),
-        createDepartment({ deptName: 'dermatology', deptID: '736001' }),
-        createDepartment({ deptName: 'obgyn', deptID: '736002' }),
-        createDepartment({ deptName: 'ophthalmology', deptID: '736003' }),
-        createDepartment({ deptName: 'neurology', deptID: '736004' }),
-        createDepartment({ deptName: 'neurosurgery', deptID: '736005' }),
-        createDepartment({ deptName: 'orthopedics', deptID: '736006' })
+        createDepartment({ deptName: 'pathology', deptID: '736000', schoolID: '20000' }),
+        createDepartment({ deptName: 'dermatology', deptID: '736001', schoolID: '20000' }),
+        createDepartment({ deptName: 'obgyn', deptID: '736002', schoolID: '20000' }),
+        createDepartment({ deptName: 'ophthalmology', deptID: '736003', schoolID: '20000' }),
+        createDepartment({ deptName: 'neurology', deptID: '736004', schoolID: '20000' }),
+        createDepartment({ deptName: 'neurosurgery', deptID: '736005', schoolID: '20000' }),
+        createDepartment({ deptName: 'orthopedics', deptID: '736006', schoolID: '20000' })
     ]);
 
-    const [medicine, publicHealth, nursing, artsAndSciences, primateCenter] = await Promise.all([
-        createSchool({ schoolName: 'medicine' }),
-        createSchool({ schoolName: 'publicHealth' }),
-        createSchool({ schoolName: 'nursing' }),
-        createSchool({ schoolName: 'artsAndSciences' }),
-        createSchool({ schoolName: 'primateCenter' })
-    ]);
 
     const [rasAdmin, rasManager, rasAD, rasDirector] = await Promise.all([
-        createRole({ roleName: 'rasAdmin', management: false }),
+        createRole({ roleName: 'rasUser', management: false }),
         createRole({ roleName: 'rasManager', management: true }),
         createRole({ roleName: 'rasAD', management: true }),
         createRole({ roleName: 'rasDirector', management: true })
     ]);
 
     const [DrSmith, DrJones, DrJohnson, DrWilliams, DrBrown, DrDavis, DrMiller, DrKeeling, DrFranks, DrJoohnson] = await Promise.all([
-        createInvestigator({ email: 'smith@email.com', password: '123' }),
-        createInvestigator({ email: 'jones@email.com', password: '123' }),
-        createInvestigator({ email: 'johnson@email.com', password: '123' }),
-        createInvestigator({ email: 'williams@email.com', password: '123' }),
-        createInvestigator({ email: 'brown@email.com', password: '123' }),
-        createInvestigator({ email: 'davis@email.com', password: '123' }),
-        createInvestigator({ email: 'miller@email.com', password: '123' }),
-        createInvestigator({ email: 'keeling@email.com', password: '123' }),
-        createInvestigator({ email: 'franks@email.com', password: '123' }),
-        createInvestigator({ email: 'joohnson@email.com', password: '123' })
+        createInvestigator({ invName: 'DrSmith', email: 'smith@email.com', password: '123', empID: '333' }),
+        createInvestigator({ invName: 'DrJones', email: 'jones@email.com', password: '123', empID: '587' }),
+        createInvestigator({ invName: 'DrJohnson', email: 'johnson@email.com', password: '123', empID: '874' }),
+        createInvestigator({ invName: 'DrWilliams', email: 'williams@email.com', password: '123', empID: '247' }),
+        createInvestigator({ invName: 'DrBrown', email: 'brown@email.com', password: '123', empID: '555' }),
+        createInvestigator({ invName: 'DrDavis', email: 'davis@email.com', password: '123', empID: '987' }),
+        createInvestigator({ invName: 'DrMiller', email: 'miller@email.com', password: '123', empID: '111' }),
+        createInvestigator({ invName: 'DrKeeling', email: 'keeling@email.com', password: '123', empID: '777' }),
+        createInvestigator({ invName: 'DrFranks', email: 'franks@email.com', password: '123', empID: '888' }),
+        createInvestigator({ invName: 'DrJoohnson', email: 'joohnson@email.com', password: '123', empID: '698' })
     ]);
 
     console.log('Sample data seeded');

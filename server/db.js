@@ -11,6 +11,10 @@ if (JWT === 'shhh') {
 const createTables = async () => {
     const SQL = `
     DROP TABLE IF EXISTS assignments;
+    DROP TABLE IF EXISTS proposedEffort;
+    DROP TABLE IF EXISTS awardedEffort;
+    DROP TABLE IF EXISTS proposals;
+    DROP TABLE IF EXISTS awards;
     DROP TABLE IF EXISTS users;
     DROP TABLE IF EXISTS departments;
     DROP TABLE IF EXISTS roles;
@@ -22,64 +26,64 @@ const createTables = async () => {
         id UUID PRIMARY KEY,
         roleName VARCHAR(20) UNIQUE NOT NULL,
         management BOOLEAN
-        );
+    );
 
     CREATE TABLE rasUnits(
         id UUID PRIMARY KEY,
         rasName VARCHAR(20) UNIQUE NOT NULL,
         rasID VARCHAR(10),
         rasDirector VARCHAR(20),
-        rasEmail VARCHAR(20),
-        rasWebsite VARCHAR(20)
-        );
+        rasEmail VARCHAR(50),
+        rasWebsite VARCHAR(50)
+    );
 
     CREATE TABLE users(
         id UUID PRIMARY KEY,
-        email VARCHAR(20) UNIQUE NOT NULL,
+        email VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        userName VARCHAR(20),
-        jobTitle VARCHAR(20),
+        userName VARCHAR(50),
+        jobTitle VARCHAR(50),
         empID VARCHAR(10),
         jobRole VARCHAR(20) REFERENCES roles(roleName),
-        rasName VARCHAR(20) REFERENCES rasUnits(rasName),
-        );
+        rasName VARCHAR(20) REFERENCES rasUnits(rasName)
+    );
 
     CREATE TABLE investigators(
         id UUID PRIMARY KEY,
-        email VARCHAR(20) UNIQUE NOT NULL,
+        email VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        invName VARCHAR(20),
-        invTitle VARCHAR(20),
-        empID VARCHAR(10),
-        commonsId VARCHAR(10),
-        );
+        invName VARCHAR(50),
+        invTitle VARCHAR(50),
+        empID VARCHAR(10) UNIQUE NOT NULL,
+        commonsId VARCHAR(10)
+    );
 
     CREATE TABLE schools(
         id UUID PRIMARY KEY,
-        schoolName VARCHAR(20) UNIQUE NOT NULL,
-        schoolID VARCHAR(10),
-        schoolDean VARCHAR(20),
-        );
+        schoolName VARCHAR(50) NOT NULL,
+        schoolID VARCHAR(10) NOT NULL UNIQUE,
+        schoolDean VARCHAR(50)
+    );
 
     CREATE TABLE departments(
         id UUID PRIMARY KEY,
-        deptName VARCHAR(20) UNIQUE NOT NULL,
+        deptName VARCHAR(50) UNIQUE NOT NULL,
         deptID VARCHAR(10),
-        deptChair VARCHAR(20),
-        deptAdmin VARCHAR(20),
-        schoolName VARCHAR(20) REFERENCES schools(schoolName),
-        rasName VARCHAR(20) REFERENCES rasUnits(rasName),
-        );
+        deptChair VARCHAR(50),
+        deptAdmin VARCHAR(50),
+        schoolID VARCHAR(10) REFERENCES schools(schoolID),
+        rasName VARCHAR(20) REFERENCES rasUnits(rasName)
+    );
 
     CREATE TABLE proposals(
         id UUID PRIMARY KEY,
-        epexID INT,
+        epexID INT UNIQUE,
         propTitle VARCHAR(150),
         propPrimeSponsor VARCHAR(50),
-        propAwardingEntity VARCHAR(50), //this could be the same as propPrimeSponsor
+        propAwardingEntity VARCHAR(50),
         propOpportunityID VARCHAR(50),
         propSponsorType VARCHAR(50),
-        propSource(Domestic, Foreign) VARCHAR(20),
+        propSource VARCHAR(20), 
         propPlaceOfPerformance VARCHAR(50),
         propDueDate DATE,
         propStart DATE,
@@ -88,17 +92,17 @@ const createTables = async () => {
         propMajorGoals VARCHAR(900),
         propSpecificAims VARCHAR(900),
         propSubmittingRAS VARCHAR(20),
-        propPreSubmitter VARCHAR(20),
-        );
+        propPreSubmitter VARCHAR(20)
+    );
 
     CREATE TABLE awards(
         id UUID PRIMARY KEY,
-        awardID INT,
+        awardID INT UNIQUE,
         awardTitle VARCHAR(150),
         awardPrimeSponsor VARCHAR(50),
-        awardAwardingEntity VARCHAR(50), //this could be the same as awardPrimeSponsor
+        awardAwardingEntity VARCHAR(50),
         awardSponsorType VARCHAR(50),
-        awardSource(Domestic, Foreign) VARCHAR(20),
+        awardSource VARCHAR(20), 
         awardPlaceOfPerformance VARCHAR(50),
         awardStart DATE,
         awardEnd DATE,
@@ -106,90 +110,88 @@ const createTables = async () => {
         awardMajorGoals VARCHAR(900),
         awardSpecificAims VARCHAR(900),
         awardManagingRAS VARCHAR(20),
-        awardPostContact VARCHAR(20),
-        );
-        
-    CREATE TABLE proposedEffort {
+        awardPostContact VARCHAR(20)
+    );
+
+    CREATE TABLE proposedEffort (
         id UUID PRIMARY KEY,
         epexID INT REFERENCES proposals(epexID),
         empID VARCHAR(10) REFERENCES investigators(empID),
-        propYr1effort PERCENT,
-        propYr2effort PERCENT,
-        propYr3effort PERCENT,
-        propYr4effort PERCENT,
-        propYr5effort PERCENT,
-        propYr6effort PERCENT,
-        propYr7effort PERCENT,
-        propYr8effort PERCENT,
-        propYr9effort PERCENT,
-        propYr10effort PERCENT,
-        );
+        propYr1effort NUMERIC(5,2),
+        propYr2effort NUMERIC(5,2),
+        propYr3effort NUMERIC(5,2),
+        propYr4effort NUMERIC(5,2),
+        propYr5effort NUMERIC(5,2),
+        propYr6effort NUMERIC(5,2),
+        propYr7effort NUMERIC(5,2),
+        propYr8effort NUMERIC(5,2),
+        propYr9effort NUMERIC(5,2),
+        propYr10effort NUMERIC(5,2)
+    );
 
-    CREATE TABLE awardedEffort {
+    CREATE TABLE awardedEffort (
         id UUID PRIMARY KEY,
         awardID INT REFERENCES awards(awardID),
         empID VARCHAR(10) REFERENCES investigators(empID),
-        awardYr1effort PERCENT,
-        awardYr2effort PERCENT,
-        awardYr3effort PERCENT,
-        awardYr4effort PERCENT,
-        awardYr5effort PERCENT,
-        awardYr6effort PERCENT,
-        awardYr7effort PERCENT,
-        awardYr8effort PERCENT,
-        awardYr9effort PERCENT,
-        awardYr10effort PERCENT,
-        );
-         
+        awardYr1effort NUMERIC(5,2),
+        awardYr2effort NUMERIC(5,2),
+        awardYr3effort NUMERIC(5,2),
+        awardYr4effort NUMERIC(5,2),
+        awardYr5effort NUMERIC(5,2),
+        awardYr6effort NUMERIC(5,2),
+        awardYr7effort NUMERIC(5,2),
+        awardYr8effort NUMERIC(5,2),
+        awardYr9effort NUMERIC(5,2),
+        awardYr10effort NUMERIC(5,2)
+    );
 
     CREATE TABLE assignments(
         id UUID PRIMARY KEY,
         user_id UUID REFERENCES users(id),
         dept_id UUID REFERENCES departments(id),
         CONSTRAINT unique_assignment UNIQUE(user_id, dept_id)
-        );
+    );
     `;
     await client.query(SQL);
-
 };
 
-const createSchool = async ({ schoolName, schoolID, schoolDean }) => {
+const createSchool = async ({ schoolName, schoolID }) => {
     const SQL = `
-    INSERT INTO schools(schoolName, schoolID, schoolDean)
+    INSERT INTO schools(id, schoolName, schoolID)
     VALUES($1, $2, $3)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), schoolName, schoolID, schoolDean]);
+    const response = await client.query(SQL, [uuid.v4(), schoolName, schoolID]);
     return response.rows[0];
 };
 
 const createRasUnit = async ({ rasName, rasID, rasDirector, rasEmail, rasWebsite }) => {
     const SQL = `
-    INSERT INTO rasUnits(rasName, rasID, rasDirector, rasEmail, rasWebsite)
-    VALUES($1, $2, $3, $4, $5)
+    INSERT INTO rasUnits(id, rasName, rasID, rasDirector, rasEmail, rasWebsite)
+    VALUES($1, $2, $3, $4, $5, $6)
     RETURNING *;
     `;
     const response = await client.query(SQL, [uuid.v4(), rasName, rasID, rasDirector, rasEmail, rasWebsite]);
     return response.rows[0];
 }
 
-const createDepartment = async ({ deptName, deptID, deptChair, deptAdmin, schoolName, rasName }) => {
+const createDepartment = async ({ deptName, deptID, schoolID }) => {
     const SQL = `
-    INSERT INTO departments(deptName, deptID, deptChair, deptAdmin, schoolName, rasName)
-    VALUES($1, $2, $3, $4, $5, $6)
+    INSERT INTO departments(id, deptName, deptID, schoolID) 
+    VALUES($1, $2, $3, $4)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), deptName, deptID, deptChair, deptAdmin, schoolName, rasName]);
+    const response = await client.query(SQL, [uuid.v4(), deptName, deptID, schoolID]);
     return response.rows[0];
 };
 
-const createUser = async ({ email, password, name, jobTitle, empID, jobRole, rasName }) => {
+const createUser = async ({ userName, email, password }) => {
     const SQL = `
-    INSERT INTO users(email, password, name, jobTitle, empID, jobRole, rasName)
-    VALUES($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO users(id, userName, email, password)
+    VALUES($1, $2, $3, $4)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), email, password, name, jobTitle, empID, jobRole, rasName]);
+    const response = await client.query(SQL, [uuid.v4(), userName, email, password]);
     return response.rows[0];
 };
 
@@ -201,21 +203,21 @@ const createUserAndGenerateToken = async ({ email, password }) => {
 
 const createRole = async ({ roleName, management }) => {
     const SQL = `
-    INSERT INTO roles(roleName, management)
-    VALUES($1, $2)
+    INSERT INTO roles(id, roleName, management)
+    VALUES($1, $2, $3)
     RETURNING *;
     `;
     const response = await client.query(SQL, [uuid.v4(), roleName, management]);
     return response.rows[0];
 };
 
-const createInvestigator = async ({ email, password, name, invTitle, empID, commonsId }) => {
+const createInvestigator = async ({ invName, email, password, empID }) => {
     const SQL = `
-    INSERT INTO investigators(email, password, name, invTitle, empID, commonsId)
-    VALUES($1, $2, $3, $4, $5, $6)
+    INSERT INTO investigators(id, invName, email, password, empID)
+    VALUES($1, $2, $3, $4, $5)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), email, password, name, invTitle, empID, commonsId]);
+    const response = await client.query(SQL, [uuid.v4(), invName, email, password, empID]);
     return response.rows[0];
 };
 
