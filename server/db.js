@@ -43,7 +43,7 @@ const createTables = async () => {
         password VARCHAR(255) NOT NULL,
         userName VARCHAR(50),
         jobTitle VARCHAR(50),
-        empID VARCHAR(10),
+        userID VARCHAR(10) UNIQUE NOT NULL,
         jobRole VARCHAR(20) REFERENCES roles(roleName),
         rasName VARCHAR(20) REFERENCES rasUnits(rasName)
     );
@@ -54,7 +54,7 @@ const createTables = async () => {
         password VARCHAR(255) NOT NULL,
         invName VARCHAR(50),
         invTitle VARCHAR(50),
-        empID VARCHAR(10) UNIQUE NOT NULL,
+        invID VARCHAR(10) UNIQUE NOT NULL,
         commonsId VARCHAR(10)
     );
 
@@ -68,7 +68,7 @@ const createTables = async () => {
     CREATE TABLE departments(
         id UUID PRIMARY KEY,
         deptName VARCHAR(50) UNIQUE NOT NULL,
-        deptID VARCHAR(10),
+        deptID VARCHAR(10) UNIQUE NOT NULL,
         deptChair VARCHAR(50),
         deptAdmin VARCHAR(50),
         schoolID VARCHAR(10) REFERENCES schools(schoolID),
@@ -116,7 +116,7 @@ const createTables = async () => {
     CREATE TABLE proposedEffort (
         id UUID PRIMARY KEY,
         epexID INT REFERENCES proposals(epexID),
-        empID VARCHAR(10) REFERENCES investigators(empID),
+        propInvID VARCHAR(10) REFERENCES investigators(invID),
         propYr1effort NUMERIC(5,2),
         propYr2effort NUMERIC(5,2),
         propYr3effort NUMERIC(5,2),
@@ -132,7 +132,7 @@ const createTables = async () => {
     CREATE TABLE awardedEffort (
         id UUID PRIMARY KEY,
         awardID INT REFERENCES awards(awardID),
-        empID VARCHAR(10) REFERENCES investigators(empID),
+        awrdInvID VARCHAR(10) REFERENCES investigators(invID),
         awardYr1effort NUMERIC(5,2),
         awardYr2effort NUMERIC(5,2),
         awardYr3effort NUMERIC(5,2),
@@ -147,8 +147,8 @@ const createTables = async () => {
 
     CREATE TABLE assignments(
         id UUID PRIMARY KEY,
-        user_id UUID REFERENCES users(id),
-        dept_id UUID REFERENCES departments(id),
+        dept_id UUID REFERENCES departments(id) NOT NULL,
+        user_id UUID REFERENCES users(id) NOT NULL,
         CONSTRAINT unique_assignment UNIQUE(user_id, dept_id)
     );
     `;
@@ -185,13 +185,13 @@ const createDepartment = async ({ deptName, deptID, schoolID }) => {
     return response.rows[0];
 };
 
-const createUser = async ({ userName, email, password }) => {
+const createUser = async ({ userName, email, password, userID }) => {
     const SQL = `
-    INSERT INTO users(id, userName, email, password)
-    VALUES($1, $2, $3, $4)
+    INSERT INTO users(id, userName, email, password, userID)
+    VALUES($1, $2, $3, $4, $5)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), userName, email, password]);
+    const response = await client.query(SQL, [uuid.v4(), userName, email, password, userID]);
     return response.rows[0];
 };
 
@@ -211,13 +211,13 @@ const createRole = async ({ roleName, management }) => {
     return response.rows[0];
 };
 
-const createInvestigator = async ({ invName, email, password, empID }) => {
+const createInvestigator = async ({ invName, email, password, invID }) => {
     const SQL = `
-    INSERT INTO investigators(id, invName, email, password, empID)
+    INSERT INTO investigators(id, invName, email, password, invID)
     VALUES($1, $2, $3, $4, $5)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [uuid.v4(), invName, email, password, empID]);
+    const response = await client.query(SQL, [uuid.v4(), invName, email, password, invID]);
     return response.rows[0];
 };
 
@@ -245,6 +245,14 @@ const fetchInvestigators = async () => {
     return response.rows;
 };
 
+const fetchRoles = async () => {
+    const SQL = `
+    SELECT * FROM roles;
+    `;
+    const response = await client.query(SQL);
+    return response.rows;
+};
+
 const fetchAssignments = async (user_id) => {
     const SQL = `
     SELECT * FROM assignments WHERE user_id=$1
@@ -253,13 +261,15 @@ const fetchAssignments = async (user_id) => {
     return response.rows;
 };
 
+//also consider fetch assignmnets by dept_id or by RAS Unit but only for management roles
+
 const createAssignment = async ({ user_id, dept_id }) => {
     const SQL = `
-    INSERT INTO assignments(user_id, dept_id)
-    VALUES($1, $2)
+    INSERT INTO assignments(id, user_id, dept_id)
+    VALUES($1, $2, $3)
     RETURNING *;
     `;
-    const response = await client.query(SQL, [user_id, dept_id]);
+    const response = await client.query(SQL, [uuid.v4(), user_id, dept_id]);
     return response.rows[0];
 };
 
@@ -320,6 +330,7 @@ module.exports = {
     fetchUsers,
     fetchDepartments,
     fetchInvestigators,
+    fetchRoles,
     fetchAssignments,
     createAssignment,
     destroyAssignment,

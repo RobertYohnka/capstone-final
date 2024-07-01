@@ -7,8 +7,16 @@ const Departments = () => {
 
     useEffect(() => {
         fetch('/api/departments')
-            .then(response => response.json())
-            .then(data => setDepartments(data))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch departments: ${response.status}`);
+                }
+                response.json();
+            })
+            .then(data => {
+                console.log('Fetched departments:', data);
+                setDepartments(data);
+            })
             .catch(error => console.error('Error fetching departments:', error));
     }, []);
 

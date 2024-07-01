@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { InvestigatorCard } from './InvestigatorCard'
-import { fetchInvestigators } from '../API'
+
 
 function AllInvestigators() {
     const [investigators, setInvestigators] = useState([]);

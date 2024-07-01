@@ -1,11 +1,42 @@
 import React from 'react';
+// import { Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Services from './components/Services';
 import News from './components/News';
-import Departments from './components/Departments';
+import AllUsers from './components/AllUsers';
+// import Departments from './components/Departments';
 import Footer from './components/Footer';
-import Users from './components/Users';
+// import Home from './components/Home';
+// import Investigators from './components/Investigators';
+// import Awards from './components/Awards';
+// import Login from './components/Login';
+// import Profile from './components/Profile';
 import './styles/styles.css';
+
+
+// const App = () => {
+//   return (
+//     <Router>
+//       <div className="app">
+//         <Header />
+//         <Routes>
+//           <Route path="/" element={<Home />} />
+//           <Route path="/services" element={<Services />} />
+//           <Route path="/news" element={<News />} />
+//           <Route path="/users" element={<Users />} />
+//           <Route path="/departments" element={<Departments />} />
+//           <Route path="/investigators" element={<Investigators />} />
+//           <Route path="/awards" element={<Awards />} />
+//           <Route path="/login" element={<Login />} />
+//           <Route path="/profile" element={<Profile />} />
+//         </Routes>
+//         <Footer />
+//       </div>
+//     </Router>
+//   );
+// };
+
+// export default App;
 
 const App = () => {
   return (
@@ -13,8 +44,8 @@ const App = () => {
       <Header />
       <Services />
       <News />
-      <Users />
-      <Departments />
+      <AllUsers />
+      {/* <Departments /> */}
       <Footer />
     </div>
   );

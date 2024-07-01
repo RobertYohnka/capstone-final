@@ -10,6 +10,7 @@ const {
     fetchUsers,
     fetchDepartments,
     fetchInvestigators,
+    fetchRoles,
     fetchAssignments,
     createAssignment,
     destroyAssignment,
@@ -19,11 +20,13 @@ const {
 const express = require('express');
 const app = express();
 app.use(express.json());
+// app.use('/api/users', require('./controllers/users'));
+// app.use('/api/departmenmts', require('./controllers/departmemts'));
 
 //for deployment only
-const path = require('path');
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../client/dist/index.html')));
-app.use(express.static(path.join(__dirname, '../capstone-client/dist')));
+// const path = require('path');
+// app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../client/dist/index.html')));
+// app.use(express.static(path.join(__dirname, '../capstone-client/dist')));
 
 //this is middleware checking if the user is logged in
 const isLoggedIn = async (req, res, next) => {
@@ -34,6 +37,8 @@ const isLoggedIn = async (req, res, next) => {
         next(ex);
     }
 };
+
+//consider using this middleware to check if the user is a manager
 
 //api routes
 app.post('/api/auth/login', async (req, res, next) => {
@@ -144,6 +149,8 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).send({ error: err.message ? err.message : err });
 });
 
+
+
 const init = async () => {
     const port = process.env.PORT || 3000;
     await client.connect();
@@ -153,13 +160,13 @@ const init = async () => {
     console.log('tables created');
 
     const [bob, bill, sarah, amanda, claire, fran, jill] = await Promise.all([
-        createUser({ userName: 'bob', email: 'bob@email.com', password: '123' }),
-        createUser({ userName: 'bill', email: 'bill@email.com', password: '123' }),
-        createUser({ userName: 'sarah', email: 'sarah@email.com', password: '123' }),
-        createUser({ userName: 'amanda', email: 'amanda@email.com', password: '123' }),
-        createUser({ userName: 'claire', email: 'claire@email.com', password: '123' }),
-        createUser({ userName: 'fran', email: 'fran@email.com', password: '123' }),
-        createUser({ userName: 'jill', email: 'jill@email.com', password: '123' })
+        createUser({ userName: 'bob', email: 'bob@email.com', password: '123', userID: '987' }),
+        createUser({ userName: 'bill', email: 'bill@email.com', password: '123', userID: '654' }),
+        createUser({ userName: 'sarah', email: 'sarah@email.com', password: '123', userID: '321' }),
+        createUser({ userName: 'amanda', email: 'amanda@email.com', password: '123', userID: '129' }),
+        createUser({ userName: 'claire', email: 'claire@email.com', password: '123', userID: '194' }),
+        createUser({ userName: 'fran', email: 'fran@email.com', password: '123', userID: '491' }),
+        createUser({ userName: 'jill', email: 'jill@email.com', password: '123', userID: '231' })
     ]);
     const [medicine, publicHealth, nursing, artsAndSciences, primateCenter] = await Promise.all([
         createSchool({ schoolName: 'medicine', schoolID: '20000' }),
@@ -188,18 +195,27 @@ const init = async () => {
     ]);
 
     const [DrSmith, DrJones, DrJohnson, DrWilliams, DrBrown, DrDavis, DrMiller, DrKeeling, DrFranks, DrJoohnson] = await Promise.all([
-        createInvestigator({ invName: 'DrSmith', email: 'smith@email.com', password: '123', empID: '333' }),
-        createInvestigator({ invName: 'DrJones', email: 'jones@email.com', password: '123', empID: '587' }),
-        createInvestigator({ invName: 'DrJohnson', email: 'johnson@email.com', password: '123', empID: '874' }),
-        createInvestigator({ invName: 'DrWilliams', email: 'williams@email.com', password: '123', empID: '247' }),
-        createInvestigator({ invName: 'DrBrown', email: 'brown@email.com', password: '123', empID: '555' }),
-        createInvestigator({ invName: 'DrDavis', email: 'davis@email.com', password: '123', empID: '987' }),
-        createInvestigator({ invName: 'DrMiller', email: 'miller@email.com', password: '123', empID: '111' }),
-        createInvestigator({ invName: 'DrKeeling', email: 'keeling@email.com', password: '123', empID: '777' }),
-        createInvestigator({ invName: 'DrFranks', email: 'franks@email.com', password: '123', empID: '888' }),
-        createInvestigator({ invName: 'DrJoohnson', email: 'joohnson@email.com', password: '123', empID: '698' })
+        createInvestigator({ invName: 'DrSmith', email: 'smith@email.com', password: '123', invID: '333' }),
+        createInvestigator({ invName: 'DrJones', email: 'jones@email.com', password: '123', invID: '587' }),
+        createInvestigator({ invName: 'DrJohnson', email: 'johnson@email.com', password: '123', invID: '874' }),
+        createInvestigator({ invName: 'DrWilliams', email: 'williams@email.com', password: '123', invID: '247' }),
+        createInvestigator({ invName: 'DrBrown', email: 'brown@email.com', password: '123', invID: '555' }),
+        createInvestigator({ invName: 'DrDavis', email: 'davis@email.com', password: '123', invID: '987' }),
+        createInvestigator({ invName: 'DrMiller', email: 'miller@email.com', password: '123', invID: '111' }),
+        createInvestigator({ invName: 'DrKeeling', email: 'keeling@email.com', password: '123', invID: '777' }),
+        createInvestigator({ invName: 'DrFranks', email: 'franks@email.com', password: '123', invID: '888' }),
+        createInvestigator({ invName: 'DrJoohnson', email: 'joohnson@email.com', password: '123', invID: '698' })
     ]);
 
+    const [assignment1, assignment2, assignment3, assignment4, assignment5, assignment6, assignment7, assignment8, assignment9, assignment10] = await Promise.all([
+        createAssignment({ user_id: bob.id, dept_id: pathology.id }),
+        createAssignment({ user_id: bill.id, dept_id: dermatology.id }),
+        createAssignment({ user_id: sarah.id, dept_id: obgyn.id }),
+        createAssignment({ user_id: amanda.id, dept_id: ophthalmology.id }),
+        createAssignment({ user_id: claire.id, dept_id: neurology.id }),
+        createAssignment({ user_id: fran.id, dept_id: neurosurgery.id }),
+        createAssignment({ user_id: jill.id, dept_id: orthopedics.id }),
+    ]);
     console.log('Sample data seeded');
     app.listen(port, () => console.log(`Listening on port ${port}`));
 };
